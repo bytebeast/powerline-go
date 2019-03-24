@@ -301,6 +301,8 @@ func (p *powerline) draw() string {
 
 	var buffer bytes.Buffer
 
+	buffer.WriteRune('\n')
+
 	if *p.args.Eval {
 		if p.align == alignLeft {
 			buffer.WriteString(p.shellInfo.evalPromptPrefix)
