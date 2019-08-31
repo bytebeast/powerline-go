@@ -14,13 +14,15 @@ import (
 type alignment int
 
 const (
+	alignLeft alignment = iota
+	alignRight
+)
+
+const (
 	MinUnsignedInteger uint = 0
 	MaxUnsignedInteger      = ^MinUnsignedInteger
 	MaxInteger              = int(MaxUnsignedInteger >> 1)
 	MinInteger              = ^MaxInteger
-
-	alignLeft alignment = iota
-	alignRight
 )
 
 type segment struct {
@@ -35,30 +37,31 @@ type segment struct {
 }
 
 type args struct {
-	CwdMode              *string
-	CwdMaxDepth          *int
-	CwdMaxDirSize        *int
-	ColorizeHostname     *bool
-	EastAsianWidth       *bool
-	PromptOnNewLine      *bool
-	Mode                 *string
-	Theme                *string
-	Shell                *string
-	Modules              *string
-	ModulesRight         *string
-	Priority             *string
-	MaxWidthPercentage   *int
-	TruncateSegmentWidth *int
-	PrevError            *int
-	NumericExitCodes     *bool
-	IgnoreRepos          *string
-	ShortenGKENames      *bool
-	ShortenEKSNames      *bool
-	ShellVar             *string
-	PathAliases          *string
-	Duration             *string
-	Eval                 *bool
-	Condensed            *bool
+	CwdMode               *string
+	CwdMaxDepth           *int
+	CwdMaxDirSize         *int
+	ColorizeHostname      *bool
+	EastAsianWidth        *bool
+	PromptOnNewLine       *bool
+	StaticPromptIndicator *bool
+	Mode                  *string
+	Theme                 *string
+	Shell                 *string
+	Modules               *string
+	ModulesRight          *string
+	Priority              *string
+	MaxWidthPercentage    *int
+	TruncateSegmentWidth  *int
+	PrevError             *int
+	NumericExitCodes      *bool
+	IgnoreRepos           *string
+	ShortenGKENames       *bool
+	ShortenEKSNames       *bool
+	ShellVar              *string
+	PathAliases           *string
+	Duration              *string
+	Eval                  *bool
+	Condensed             *bool
 }
 
 func (s segment) computeWidth(condensed bool) int {
@@ -168,6 +171,10 @@ func main() {
 			"newline",
 			false,
 			comments("Show the prompt on a new line")),
+		StaticPromptIndicator: flag.Bool(
+			"static-prompt-indicator",
+			false,
+			comments("Always show the prompt indicator with the default color, never with the error color")),
 		Mode: flag.String(
 			"mode",
 			"patched",
@@ -274,8 +281,7 @@ func main() {
 
 	p := newPowerline(args, getValidCwd(), priorities, alignLeft)
 	if p.supportsRightModules() && p.hasRightModules() && !*args.Eval {
-		fmt.Fprintln(os.Stderr, "Flag '-modules-right' requires '-eval' mode.")
-		os.Exit(1)
+		panic("Flag '-modules-right' requires '-eval' mode.")
 	}
 
 	fmt.Print(p.draw())
